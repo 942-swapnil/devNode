@@ -1,6 +1,41 @@
 const express = require("express");
 
 const app = express();
+const { adminAuth , userAuth} = require("./Middleware/auth.js")
+
+
+
+app.use("/admin", adminAuth)
+
+// app.use("/admin",(req,res,next)=>{
+//     console.log("In admin middleware")
+
+//     let token = "abc";
+//     let isAdminAtherised = token === "abc";
+
+//     if(!isAdminAtherised){
+//         res.status(401).send("Admin is not authorized")
+//     }else{
+//         next();
+//     }
+// })
+
+app.get("/user/getUserData", userAuth , (req,res)=>{
+    res.send("Admin access all data from database")
+})
+
+app.get("/admin/getAllData",(req,res)=>{
+    res.send("Admin access all data from database")
+})
+
+app.delete("/admin/deleteUser",(req,res)=>{
+    res.send("Admin deleted userfrom database")
+})
+
+
+
+
+
 
 
 app.use("/",
