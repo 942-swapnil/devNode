@@ -2,6 +2,29 @@ const express = require("express");
 
 const app = express();
 
+
+app.use("/",
+   (req,res,next)=>{
+   console.log("response !!")
+//    res.send("Response !!!")
+   next()
+},(req,res,next)=>{
+    console.log("response 2 !!")
+    // res.send("Response 2 !!!")
+    next()
+},(req,res,next)=>{
+    console.log("response 3 !!")
+    // res.send("Response 3 !!!")
+    next()
+},(req,res,next)=>{
+    console.log("response 4 !!")
+    res.send("Response 4 !!!")
+    // next()
+})
+
+
+
+
 app.get("/user/:userId/:userName",(req,res)=>{
     console.log(req.params);
     res.send({firstName:"Swapnil" , lastName:"Navghare" , gender: "Male"})
