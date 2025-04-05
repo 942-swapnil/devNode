@@ -2,6 +2,10 @@ const express = require("express");
 
 const app = express();
 
+app.get("/user/:userId/:userName",(req,res)=>{
+    console.log(req.params);
+    res.send({firstName:"Swapnil" , lastName:"Navghare" , gender: "Male"})
+})
 
 app.get("/user",(req,res)=>{
     res.send({firstName:"Swapnil" , lastName:"Navghare" , gender: "Male"})
