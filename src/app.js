@@ -83,22 +83,59 @@ app.delete("/deleteUserById",async (req,res)=>{
     }
 })
 
-app.patch("/updateUserById", async (req,res)=>{
-    const userId = req.body.userId;
-    const data = req.body;
-    try{
+// app.patch("/updateUserById", async (req,res)=>{
+//     const userId = req.body.userId;
+//     const data = req.body;
+//     console.log(req.body)
+//     try{
         
-        const user = await User.findByIdAndUpdate(userId, data);
+//         const user = await User.findByIdAndUpdate(userId, data, {
+//             returnDocument:'after',
+//             runValidators : true
+//         });
+//         console.log(user);
+//         if(!user){
+//             res.status(404).send("User not found");
+//         }else{
+//             res.send("User updated successfully");
+//         }
+//     }catch(err){
+//         res.status(400).send("Something went wrong : "+ err.message );
+//     }
+// })
+
+
+app.patch("/updateUserById/:userID", async (req,res)=>{
+    const userId = req.params?.userID;
+    const data = req.body;
+    console.log(req.body)
+    try{
+        const allowed_parameter = ["imgUrl","about","skills","firstName","lastName","password","gender"];
+        console.log(Object.keys(data))
+        const isAllowed = Object.keys(data).every(k => allowed_parameter.includes(k))
+
+        if(!isAllowed){
+            throw new Error("Parameter not proper");
+        }
+
+        if(req.body?.skills?.length > 10){
+            throw new Error("maximum 10 skills you can add");
+        }
+
+        const user = await User.findByIdAndUpdate(userId, data, {
+            returnDocument:'after',
+            runValidators : true
+        });
+        console.log(user);
         if(!user){
             res.status(404).send("User not found");
         }else{
             res.send("User updated successfully");
         }
     }catch(err){
-        res.status(400).send("Something went wrong");
+        res.status(400).send("Something went wrong : "+ err.message );
     }
 })
-
 
 connectDB().then(()=>{
     console.log("Database connection establish");
