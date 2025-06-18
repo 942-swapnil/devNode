@@ -2,25 +2,88 @@ const express = require("express");
 
 const app = express();
 
+const cookieParser = require('cookie-parser')
 
 const connectDB = require("./config/database.js");
 
-app.use(express.json())
+app.use(express.json());
 const User = require('./models/user.js');
-
+var jwt = require('jsonwebtoken');
+const {validateSigngUp} = require('./utils/validators.js');
+const bcrypt = require('bcrypt');
+app.use(cookieParser());
+const {userAuth} = require('./Middleware/auth.js');
 
 
 
 app.post("/singup",async (req,res)=>{
-    // console.log(req.body)
-    const user = new User(req.body)
 
+    // Validate data
     try{
+    validateSigngUp(req);
+
+    // Encrept password (Hash password)
+
+    const { firstName , lastName , emailId , password } = req.body ;
+
+    const passwordHash = await bcrypt.hash(password , 10);
+
+
+
+    // console.log(req.body)
+    const user = new User({
+        firstName , lastName , emailId , password : passwordHash
+    })
+
+   
         await user.save()
         res.send("User created successfully")
     }catch(err){
-        res.status(400).send("User naot created : "+ err.massage);
+        res.status(400).send("User not created : "+ err.message);
     }
+
+})
+
+app.post("/login", async (req,res)=>{
+
+    try{
+        const { emailId , password } = req.body ;
+
+        const user = await User.findOne({emailId : emailId});
+
+        if(!user){
+            throw new Error("Invalid credentials");
+        }
+
+        // const isPassword = await bcrypt.compare(password , user.password);
+
+        const isPassword = await user.validatePassword(password);
+        
+        if(isPassword){
+
+            // const JWTtoken = jwt.sign({ _id: user._id }, 'Swapnil_dev@Tinder',{ expiresIn: '1h' });
+            const JWTtoken = await user.getJWT();
+            res.cookie('token',JWTtoken,{expires: new Date(Date.now() + 8 * 3600000)});
+
+            res.status(200).send("User login successfully ....!");
+        }else{
+            throw new Error("Invalid credentials");
+        }
+    }catch(err){
+        res.status(400).send("ERROR : "+ err.message);
+    }
+
+   
+})
+
+app.get("/profile",userAuth, async (req,res) =>{
+    try{
+        const userInfo =  req.user;
+        res.status(200).send(userInfo);
+    }catch(err){
+        res.status(400).send("ERROR : "+ err.message);
+    }
+
 
 })
 
@@ -53,7 +116,6 @@ app.get("/feed", async (req,res)=>{
 
 app.post("/getUserById",async (req,res)=>{
     const userID = req.body.userID;
-    console.log(userID);
 
     try{
         const user = await User.findById(userID);
@@ -69,7 +131,6 @@ app.post("/getUserById",async (req,res)=>{
 
 app.delete("/deleteUserById",async (req,res)=>{
     const userID = req.body.userID;
-    console.log(userID);
 
     try{
         const user = await User.findByIdAndDelete(userID);
@@ -86,14 +147,12 @@ app.delete("/deleteUserById",async (req,res)=>{
 // app.patch("/updateUserById", async (req,res)=>{
 //     const userId = req.body.userId;
 //     const data = req.body;
-//     console.log(req.body)
 //     try{
         
 //         const user = await User.findByIdAndUpdate(userId, data, {
 //             returnDocument:'after',
 //             runValidators : true
 //         });
-//         console.log(user);
 //         if(!user){
 //             res.status(404).send("User not found");
 //         }else{
@@ -108,10 +167,8 @@ app.delete("/deleteUserById",async (req,res)=>{
 app.patch("/updateUserById/:userID", async (req,res)=>{
     const userId = req.params?.userID;
     const data = req.body;
-    console.log(req.body)
     try{
         const allowed_parameter = ["imgUrl","about","skills","firstName","lastName","password","gender"];
-        console.log(Object.keys(data))
         const isAllowed = Object.keys(data).every(k => allowed_parameter.includes(k))
 
         if(!isAllowed){
@@ -126,7 +183,6 @@ app.patch("/updateUserById/:userID", async (req,res)=>{
             returnDocument:'after',
             runValidators : true
         });
-        console.log(user);
         if(!user){
             res.status(404).send("User not found");
         }else{
