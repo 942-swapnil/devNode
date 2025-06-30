@@ -2,19 +2,6 @@
 var jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-// const adminAuth = (req,res,next)=>{
-//     console.log("In admin middleware")
-
-//     let token = "abca";
-//     let isAdminAtherised = token === "abc";
-
-//     if(!isAdminAtherised){
-//         res.status(401).send("Admin is not authorized")
-//     }else{
-//         next();
-//     }
-// }
-
 
 const userAuth = async (req,res,next) =>{
 

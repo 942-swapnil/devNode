@@ -3,7 +3,7 @@ const express = require('express');
 const authRouter = express.Router();
 const User = require('../models/user.js');
 const {validateSigngUp} = require('../utils/validators.js');
-// const {userAuth} = require('./Middleware/auth.js');
+const {userAuth} = require('../Middleware/auth.js');
 const bcrypt = require('bcrypt');
 
 
@@ -16,13 +16,9 @@ authRouter.post("/singup",async (req,res)=>{
 
     const passwordHash = await bcrypt.hash(password , 10);
 
-
-
-    // console.log(req.body)
     const user = new User({
         firstName , lastName , emailId , password : passwordHash
     })
-
    
         await user.save()
         res.send("User created successfully")
@@ -62,6 +58,14 @@ authRouter.post("/login", async (req,res)=>{
     }
 
    
+})
+
+authRouter.post("/logout",userAuth, async (req,res)=>{
+    const user = req.user;
+
+    res.cookie('token','',{expires: new Date(Date.now())});
+
+    res,send("User logged out successfully ....!");
 })
 
 module.exports = authRouter;

@@ -16,5 +16,17 @@ validateSigngUp = (req) =>{
     }
 }
 
+validateEditProfile = (req) =>{
 
-module.exports = {validateSigngUp}
+    const isAllowed = ["firstName", "lastName", "emailId", "age", "gender", "imgUrl", "about", "skills"];
+
+    Object.keys(req.body).forEach((keys) =>{
+        if(!isAllowed.includes(keys)){
+            throw new Error("Please send valid data to update profile");
+        }
+    })
+
+}
+
+
+module.exports = {validateSigngUp , validateEditProfile}
