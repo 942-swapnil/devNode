@@ -49,7 +49,14 @@ authRouter.post("/login", async (req,res)=>{
             const JWTtoken = await user.getJWT();
             res.cookie('token',JWTtoken,{expires: new Date(Date.now() + 8 * 3600000)});
 
-            res.status(200).send("User login successfully ....!");
+            const userData = user.toObject();
+            delete userData.password;
+            delete userData.updatedAt;
+            delete userData.createdAt;
+            delete userData.__v;
+
+            // delete userData.emailId;
+            res.status(200).json({msg:"User login successfully ....!" , data:userData} );
         }else{
             throw new Error("Invalid credentials");
         }
@@ -60,12 +67,12 @@ authRouter.post("/login", async (req,res)=>{
    
 })
 
-authRouter.post("/logout",userAuth, async (req,res)=>{
+authRouter.post("/logout", userAuth, async (req,res)=>{
     const user = req.user;
 
     res.cookie('token','',{expires: new Date(Date.now())});
 
-    res,send("User logged out successfully ....!");
+    res.send("User logged out successfully ....!");
 })
 
 module.exports = authRouter;

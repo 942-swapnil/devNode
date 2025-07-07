@@ -9,7 +9,7 @@ const userAuth = async (req,res,next) =>{
         const {token} = req.cookies;
 
         if(!token){
-            throw new Error("Invalid token ..");
+            return res.status(401).send("Please login first");
         }
     
         const decoded = jwt.verify(token,'Swapnil_dev@Tinder');
@@ -17,7 +17,7 @@ const userAuth = async (req,res,next) =>{
         const user = await User.findById({_id : decoded._id});
     
         if(!user){
-            throw new Error("User does not exists");
+            res.status(404).send("User does not exists");
         }
 
         req.user = user;
